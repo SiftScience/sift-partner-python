@@ -74,7 +74,7 @@ Here's an example:
     cfg = {
             # set the URL for notifications to arrive at.  The %s is replaced by the merchant's customer ID
             "http_notification_url": "http://api.partner.com/notify?id=%s",
-            # Set the threshold to send notificatios over. This is the Sift Score/100
+            # Set the threshold to send notifications over. This is the Sift Score/100
             "http_notification_threshold": 0.60     
           }
     response = partner_client.update_notification_config(cfg)
