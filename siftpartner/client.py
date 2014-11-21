@@ -1,5 +1,6 @@
 import json
 import requests
+import sys
 
 import siftpartner
 from . import version
@@ -19,6 +20,11 @@ class Client(object):
             id: Your partner account id, which can be found at https://siftscience.com/console/settings
         """
 
+        if sys.version_info.major < 3:
+          self.UNICODE_STRING = basestring
+        else:
+          self.UNICODE_STRING = str
+
         # set api key to module scoped key if not specified
         if api_key is None:
             api_key = siftpartner.api_key
@@ -27,10 +33,10 @@ class Client(object):
         if partner_id is None:
             partner_id = siftpartner.partner_id
 
-        if not isinstance(api_key, str) or len(api_key.strip()) == 0:
+        if not isinstance(api_key, self.UNICODE_STRING) or len(api_key.strip()) == 0:
             raise RuntimeError("api_key must be a non-empty string")
 
-        if not isinstance(partner_id, str) or len(partner_id.strip()) == 0:
+        if not isinstance(partner_id, self.UNICODE_STRING) or len(partner_id.strip()) == 0:
             raise RuntimeError("partner_id must be a non-empty string")
 
         self.api_key = api_key

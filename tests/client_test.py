@@ -148,15 +148,42 @@ class TestSiftPythonClient(unittest.TestCase):
         self.test_local_partner_id = 'a_fake_test_local_partner_id'
         self.test_global_partner_id = 'a_fake_test_global_partner_id'
 
+        self.test_unicode_local_key = u'a_fake_test_local_api_key'
+        self.test_unicode_global_key = u'a_fake_test_global_api_key'
+
+        self.test_unicode_local_partner_id = u'a_fake_test_local_partner_id'
+        self.test_unicode_global_partner_id = u'a_fake_test_global_partner_id'
+
         self.sift_client = siftpartner.Client(self.test_local_key, self.test_local_partner_id)
 
 
-    def test_global_api_key(self):
+    def test_global_api_key_and_partner_id(self):
         self.assertRaises(RuntimeError, siftpartner.Client)
         siftpartner.api_key = self.test_global_key
         siftpartner.partner_id = self.test_global_partner_id
         local_key = self.test_local_key
         local_partner_id = self.test_local_partner_id
+
+        client1 = siftpartner.Client()
+        client2 = siftpartner.Client(local_key, local_partner_id)
+
+        self.assertEqual(client1.api_key, self.test_global_key, "Client was not instantiated with global api key")
+        self.assertEqual(client1.partner_id,
+                         self.test_global_partner_id,
+                         "Client was not instantiated with global partner id"
+        )
+
+        self.assertEqual(client2.api_key, self.test_local_key, "Client was not instantiated with local api key")
+        self.assertEqual(client2.partner_id,
+                         self.test_local_partner_id,
+                         "Client was not instantiated with local partner id"
+        )
+
+    def test_unicode_global_api_key_and_partner_id(self):
+        siftpartner.api_key = self.test_unicode_global_key
+        siftpartner.partner_id = self.test_unicode_global_partner_id
+        local_key = self.test_unicode_local_key
+        local_partner_id = self.test_unicode_local_partner_id
 
         client1 = siftpartner.Client()
         client2 = siftpartner.Client(local_key, local_partner_id)
