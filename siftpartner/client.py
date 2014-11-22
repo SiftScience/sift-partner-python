@@ -33,24 +33,30 @@ class Client(object):
         if partner_id is None:
             partner_id = siftpartner.partner_id
 
-        if not isinstance(api_key, self.UNICODE_STRING) or len(api_key.strip()) == 0:
-            raise RuntimeError("api_key must be a non-empty string")
+        self.validate_argument(api_key, 'API key', self.UNICODE_STRING)
 
-        if not isinstance(partner_id, self.UNICODE_STRING) or len(partner_id.strip()) == 0:
-            raise RuntimeError("partner_id must be a non-empty string")
+        self.validate_argument(partner_id, 'Partner ID', self.UNICODE_STRING)
 
         self.api_key = api_key
         self.partner_id = partner_id
 
     @staticmethod
     def user_agent():
-        return 'SiftScience/v%s sift-partner-python/%s' % (version.API_VERSION, version.VERSION)
+        return 'SiftScience/v%s sift-partner-python/%s' % (version.API_VERSION,
+                                                           version.VERSION)
 
     def accounts_url(self):
         return API_URL + "/partners/%s/accounts" % self.partner_id
 
     def notifications_config_url(self):
         return API_URL + "/accounts/%s/config" % self.partner_id
+
+    def validate_argument(self, argument, name, arg_type):
+        if not isinstance(argument, arg_type) or (
+               isinstance(argument, self.UNICODE_STRING)
+               and len(argument.strip()) == 0
+        ):
+            raise RuntimeError(name + " must be a " + str(arg_type))
 
     # Creates a new merchant account under the given partner.
     # == Parameters:
@@ -66,6 +72,13 @@ class Client(object):
     # When successful, returns a including the new account id and credentials.
     # When an error occurs, The exception is raised.
     def new_account(self, site_url, site_email, analyst_email, password):
+
+        self.validate_argument(site_url, 'Site url', self.UNICODE_STRING)
+        self.validate_argument(site_email, 'Site email', self.UNICODE_STRING)
+        self.validate_argument(analyst_email, 'Analyst email',
+                               self.UNICODE_STRING)
+        self.validate_argument(password, 'Password', self.UNICODE_STRING)
+
         properties = {'site_url': site_url,
                       'site_email': site_email,
                       'analyst_email': analyst_email,
@@ -119,6 +132,9 @@ class Client(object):
     #   This allows the url to be used as a template, into which a merchant account id can be substituted.
     #   The  notification threshold should be a floating point number between 0.0 and 1.0
     def update_notification_config(self, cfg):
+
+        self.validate_argument(cfg, 'Input', dict)
+
         headers = {'Content-Type': 'application/json',
                    'Authorization': 'Basic ' + self.api_key,
                    'User-Agent': self.user_agent()
