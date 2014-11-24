@@ -131,9 +131,26 @@ class Client(object):
     # The value of the notification_url will be a url containing the string '%s' exactly once.
     #   This allows the url to be used as a template, into which a merchant account id can be substituted.
     #   The  notification threshold should be a floating point number between 0.0 and 1.0
-    def update_notification_config(self, cfg):
+    def update_notification_config(self, notification_url = None, notification_threshold = None):
 
-        self.validate_argument(cfg, 'Input', dict)
+        properties = {}
+        # This is for backwards compatibility....DEPRECIATED
+        if isinstance(notification_url, dict):
+            properties = notification_url
+
+        # This is for support of the new way of doing things
+        else:
+            self.validate_argument(notification_url,
+                                   'Notification url',
+                                   self.UNICODE_STRING
+            )
+            self.validate_argument(notification_threshold,
+                                   'Notification threshold',
+                                   float
+            )
+
+            properties['http_notification_url'] = notification_url
+            properties['http_notification_threshold'] = notification_threshold
 
         headers = {'Content-Type': 'application/json',
                    'Authorization': 'Basic ' + self.api_key,
@@ -142,7 +159,7 @@ class Client(object):
 
         try:
             res = requests.put(self.notifications_config_url(),
-                               data=json.dumps(cfg),
+                               data=json.dumps(properties),
                                headers=headers,
                                timeout=API_TIMEOUT
             )
