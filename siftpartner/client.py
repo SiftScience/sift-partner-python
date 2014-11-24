@@ -12,12 +12,13 @@ API_TIMEOUT = 2
 
 class Client(object):
     def __init__(self, api_key=None, partner_id=None):
-        """Initialize the client.
+        """ Initialize the client
 
-        Args:
-            api_key: Your Sift Science Partner API key associated with your partner
-                account. This can be found at https://siftscience.com//console/api-keys
-            id: Your partner account id, which can be found at https://siftscience.com/console/settings
+        :param api_key: Your Sift Science Partner API key associated with your
+                partner account. This can be found at
+                https://siftscience.com//console/api-keys
+        :param partner_id: Your partner account id, which can be found at
+                https://siftscience.com/console/settings
         """
 
         if sys.version_info.major < 3:
@@ -58,21 +59,23 @@ class Client(object):
         ):
             raise RuntimeError(name + " must be a " + str(arg_type))
 
-    # Creates a new merchant account under the given partner.
-    # == Parameters:
-    # site_url
-    # the url of the merchant site
-    # site_email
-    # an email address for the merchant
-    # analyst_email
-    # an email address which will be used to log in at the Sift Console
-    # password
-    # password (at least 10 chars) to be used to sign into the Console
-    #
-    # When successful, returns a including the new account id and credentials.
-    # When an error occurs, The exception is raised.
     def new_account(self, site_url, site_email, analyst_email, password):
+        """ Creates a new merchant account
 
+        :param site_url: the url of the merchant site
+
+        :param site_email: an email address for the merchant
+
+        :param analyst_email: an email address which will be used to log in
+               at the Sift Console
+
+        :param password: password (at least 10 chars) to be used to sign into
+               the Console
+
+        :return:When successful, returns a dict including the new account id
+                and credentials.
+                When an error occurs, The exception is raised.
+        """
         self.validate_argument(site_url, 'Site url', self.UNICODE_STRING)
         self.validate_argument(site_email, 'Site email', self.UNICODE_STRING)
         self.validate_argument(analyst_email, 'Analyst email',
@@ -102,13 +105,16 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise e
 
-    # Gets a listing of the ids and keys for all merchant accounts that have
-    # been created by this partner.
-    #
-    # When successful, returns a hash including the key :data, which is an
-    # array of account descriptions. (Each element has the same structure as a
-    # single response from new_account).
     def get_accounts(self):
+        """Gets a listing of the ids and keys for all merchant accounts that
+           have been created by this partner.
+
+        :return: When successful, returns a dict including the key data, which
+                 is an array of account descriptions. (Each element has the
+                 same structure as a single response from new_account).
+
+                 When an error occurs, and exception is raised.
+        """
         headers = {'Authorization': 'Basic ' + self.api_key,
                    'User-Agent': self.user_agent()
         }
@@ -122,17 +128,37 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise e
 
-    # Updates the configuration which controls http notifications for all merchant
-    # accounts under this partner.
-    #
-    # == Parameters
-    # cfg
-    # A Hash, with keys :http_notification_url and :http_notification_threshold
-    # The value of the notification_url will be a url containing the string '%s' exactly once.
-    #   This allows the url to be used as a template, into which a merchant account id can be substituted.
-    #   The  notification threshold should be a floating point number between 0.0 and 1.0
-    def update_notification_config(self, notification_url = None, notification_threshold = None):
+    def update_notification_config(
+       self,
+       notification_url = None,
+       notification_threshold = None
+    ):
+        """ Updates the configuration which controls http notifications for
+            all merchant accounts under this partner.
 
+        :param notification_url: A String which determines the url to which
+               the POST notifications go,containing the string '%s' exactly
+               once.  This allows the url to beused as a template, into which a
+               merchant account id can be substituted.
+
+        :param notification_threshold: A floating point number between 0.0 and
+               1.0, determining the score threshold at which to push
+               notifications.  It represents the Sift Score/100
+
+        :return: When successful, a dict is returned containing the new
+                 notification configuration.
+
+                 When an error occurs, an exception is raised.
+
+        DEPRECIATED USE:
+            notification_url may also be a Hash, with keys
+            http_notification_url and http_notification_threshold.
+            The value of the notification_url will be a url containing the
+            string '%s' exactly once.  This allows the url to be used as a
+            template, into which a merchant account id can be substituted.
+            The  notification threshold should be a floating point number
+            between 0.0 and 1.0
+        """
         properties = {}
         # This is for backwards compatibility....DEPRECIATED
         if isinstance(notification_url, dict):
