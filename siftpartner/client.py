@@ -113,7 +113,7 @@ class Client(object):
                  is an array of account descriptions. (Each element has the
                  same structure as a single response from new_account).
 
-                 When an error occurs, and exception is raised.
+                 When an error occurs, an exception is raised.
         """
         headers = {'Authorization': 'Basic ' + self.api_key,
                    'User-Agent': self.user_agent()
@@ -150,7 +150,7 @@ class Client(object):
 
                  When an error occurs, an exception is raised.
 
-        DEPRECIATED USE:
+        DEPRECATED USE:
             notification_url may also be a Hash, with keys
             http_notification_url and http_notification_threshold.
             The value of the notification_url will be a url containing the
@@ -160,23 +160,28 @@ class Client(object):
             between 0.0 and 1.0
         """
         properties = {}
-        # This is for backwards compatibility....DEPRECIATED
+        # This is for backwards compatibility....DEPRECATED
         if isinstance(notification_url, dict):
             properties = notification_url
 
         # This is for support of the new way of doing things
         else:
-            self.validate_argument(notification_url,
-                                   'Notification url',
-                                   self.UNICODE_STRING
-            )
-            self.validate_argument(notification_threshold,
+
+            # for each of the parameters, only set them if they are not None
+            if notification_url is not None:
+                self.validate_argument(notification_url,
+                                       'Notification url',
+                                       self.UNICODE_STRING
+                )
+                properties['http_notification_url'] = notification_url
+
+            if notification_threshold is not None:
+                self.validate_argument(notification_threshold,
                                    'Notification threshold',
                                    float
-            )
+                )
+                properties['http_notification_threshold'] = notification_threshold
 
-            properties['http_notification_url'] = notification_url
-            properties['http_notification_threshold'] = notification_threshold
 
         headers = {'Content-Type': 'application/json',
                    'Authorization': 'Basic ' + self.api_key,
@@ -192,6 +197,8 @@ class Client(object):
             return response.Response(res)
         except requests.exceptions.RequestException as e:
             raise e
+
+
 
 
 

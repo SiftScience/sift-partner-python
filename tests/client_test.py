@@ -401,16 +401,6 @@ class TestSiftPythonClient(unittest.TestCase):
             self.assertTrue('data' in response.body.keys())
             self.assertEqual(len(response.body['data']), 2)
 
-
-    def test_config_notifications_url_with_null_config_fails(self):
-        mock_response = mock.Mock()
-        mock_response.content = json.dumps(valid_config_notification_url_response_json())
-        mock_response.json.return_value = json.loads(mock_response.content)
-        mock_response.status_code = 200
-        with mock.patch('requests.put') as mock_post:
-            mock_post.return_value = mock_response
-            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, None)
-
     def test_config_notifications_url_with_invalid_config_fails(self):
         mock_response = mock.Mock()
         mock_response.content = json.dumps(valid_config_notification_url_response_json())
@@ -418,9 +408,9 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.status_code = 200
         with mock.patch('requests.put') as mock_post:
             mock_post.return_value = mock_response
-            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, "some_string")
+            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, 12345)
 
-    def test_depreciated_config_notification_url_ok(self):
+    def test_deprecated_config_notification_url_ok(self):
         mock_response = mock.Mock()
         mock_response.content = json.dumps(valid_config_notification_url_response_json())
         mock_response.json.return_value = json.loads(mock_response.content)
@@ -428,6 +418,22 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.put') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.update_notification_config(valid_config_notification_url_properties())
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
+                                         '%s/config' % self.sift_client.partner_id,
+                                         data=mock.ANY,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+
+    def test_deprecated_config_notification_with_empty_dictionary_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.update_notification_config({})
             mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
                                          '%s/config' % self.sift_client.partner_id,
                                          data=mock.ANY,
@@ -445,15 +451,6 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_post.return_value = mock_response
             self.assertRaises(RuntimeError, self.sift_client.update_notification_config, "", 0.60)
 
-    def test_config_notification_url_with_null_url_fails(self):
-        mock_response = mock.Mock()
-        mock_response.content = json.dumps(valid_config_notification_url_response_json())
-        mock_response.json.return_value = json.loads(mock_response.content)
-        mock_response.status_code = 200
-        with mock.patch('requests.put') as mock_post:
-            mock_post.return_value = mock_response
-            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, None, 0.60)
-
     def test_config_notification_url_with_invalid_url_fails(self):
         mock_response = mock.Mock()
         mock_response.content = json.dumps(valid_config_notification_url_response_json())
@@ -462,15 +459,6 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.put') as mock_post:
             mock_post.return_value = mock_response
             self.assertRaises(RuntimeError, self.sift_client.update_notification_config, 42, 0.60)
-
-    def test_config_notification_url_with_null_threshold_fails(self):
-        mock_response = mock.Mock()
-        mock_response.content = json.dumps(valid_config_notification_url_response_json())
-        mock_response.json.return_value = json.loads(mock_response.content)
-        mock_response.status_code = 200
-        with mock.patch('requests.put') as mock_post:
-            mock_post.return_value = mock_response
-            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, "http://api.partner.com/notify?id=%s", None)
 
     def test_config_notification_url_with_invalid_threshold_fails(self):
         mock_response = mock.Mock()
@@ -489,6 +477,44 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.put') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.update_notification_config("http://api.partner.com/notify?id=%s", 0.60)
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
+                                         '%s/config' % self.sift_client.partner_id,
+                                         data=mock.ANY,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+
+    def test_config_notification_url_with_null_threshold_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.update_notification_config(
+                "http://api.partner.com/notify?id=%s",
+                None
+            )
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
+                                         '%s/config' % self.sift_client.partner_id,
+                                         data=mock.ANY,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+
+    def test_config_notification_url_with_null_url_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.update_notification_config(
+                None,
+                0.60
+            )
             mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
                                          '%s/config' % self.sift_client.partner_id,
                                          data=mock.ANY,
