@@ -148,10 +148,16 @@ class TestSiftPythonClient(unittest.TestCase):
         self.test_local_partner_id = 'a_fake_test_local_partner_id'
         self.test_global_partner_id = 'a_fake_test_global_partner_id'
 
+        self.test_unicode_local_key = u'a_fake_test_local_api_key'
+        self.test_unicode_global_key = u'a_fake_test_global_api_key'
+
+        self.test_unicode_local_partner_id = u'a_fake_test_local_partner_id'
+        self.test_unicode_global_partner_id = u'a_fake_test_global_partner_id'
+
         self.sift_client = siftpartner.Client(self.test_local_key, self.test_local_partner_id)
 
 
-    def test_global_api_key(self):
+    def test_global_api_key_and_partner_id(self):
         self.assertRaises(RuntimeError, siftpartner.Client)
         siftpartner.api_key = self.test_global_key
         siftpartner.partner_id = self.test_global_partner_id
@@ -172,6 +178,183 @@ class TestSiftPythonClient(unittest.TestCase):
                          self.test_local_partner_id,
                          "Client was not instantiated with local partner id"
         )
+
+    def test_unicode_global_api_key_and_partner_id(self):
+        siftpartner.api_key = self.test_unicode_global_key
+        siftpartner.partner_id = self.test_unicode_global_partner_id
+        local_key = self.test_unicode_local_key
+        local_partner_id = self.test_unicode_local_partner_id
+
+        client1 = siftpartner.Client()
+        client2 = siftpartner.Client(local_key, local_partner_id)
+
+        self.assertEqual(client1.api_key, self.test_global_key, "Client was not instantiated with global api key")
+        self.assertEqual(client1.partner_id,
+                         self.test_global_partner_id,
+                         "Client was not instantiated with global partner id"
+        )
+
+        self.assertEqual(client2.api_key, self.test_local_key, "Client was not instantiated with local api key")
+        self.assertEqual(client2.partner_id,
+                         self.test_local_partner_id,
+                         "Client was not instantiated with local partner id"
+        )
+
+    def test_create_new_account_with_empty_site_url_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "",
+                                        "owner@somefakeurl.com",
+                                        "dropcam.dan@somefakeurl.com",
+                                        "s0mepA55word"
+                )
+
+    def test_create_new_account_with_null_site_url_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, None,
+                                        "owner@somefakeurl.com",
+                                        "dropcam.dan@somefakeurl.com",
+                                        "s0mepA55word"
+                )
+
+    def test_create_new_account_with_invalid_site_url_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, {},
+                                        "owner@somefakeurl.com",
+                                        "dropcam.dan@somefakeurl.com",
+                                        "s0mepA55word"
+                )
+
+    def test_create_new_account_with_empty_site_email_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        "",
+                                        "dropcam.dan@somefakeurl.com",
+                                        "s0mepA55word"
+            )
+
+    def test_create_new_account_with_null_site_email_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        None,
+                                        "dropcam.dan@somefakeurl.com",
+                                        "s0mepA55word"
+            )
+
+    def test_create_new_account_with_invalid_site_email_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        {},
+                                        "dropcam.dan@somefakeurl.com",
+                                        "s0mepA55word"
+            )
+
+    def test_create_new_account_with_empty_analyst_email_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        "owner@somefakeurl.com",
+                                        "",
+                                        "s0mepA55word"
+            )
+
+    def test_create_new_account_with_null_analyst_email_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        "owner@somefakeurl.com",
+                                        None,
+                                        "s0mepA55word"
+            )
+
+    def test_create_new_account_with_invalid_analyst_email_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        "owner@somefakeurl.com",
+                                        {},
+                                        "s0mepA55word"
+            )
+
+    def test_create_new_account_with_empty_password_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        "owner@somefakeurl.com",
+                                        "dropcam.dan@somefakeurl.com",
+                                        ""
+            )
+
+    def test_create_new_account_with_null_password_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        "owner@somefakeurl.com",
+                                        "dropcam.dan@somefakeurl.com",
+                                        None
+            )
+
+    def test_create_new_account_with_invalid_password_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_create_new_account_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.new_account, "somefakeurl.com",
+                                        "owner@somefakeurl.com",
+                                        "dropcam.dan@somefakeurl.com",
+                                        {}
+            )
 
     def test_create_new_account_ok(self):
         mock_response = mock.Mock()
@@ -218,7 +401,16 @@ class TestSiftPythonClient(unittest.TestCase):
             self.assertTrue('data' in response.body.keys())
             self.assertEqual(len(response.body['data']), 2)
 
-    def test_config_notification_url_ok(self):
+    def test_config_notifications_url_with_invalid_config_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, 12345)
+
+    def test_deprecated_config_notification_url_ok(self):
         mock_response = mock.Mock()
         mock_response.content = json.dumps(valid_config_notification_url_response_json())
         mock_response.json.return_value = json.loads(mock_response.content)
@@ -226,6 +418,103 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.put') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.update_notification_config(valid_config_notification_url_properties())
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
+                                         '%s/config' % self.sift_client.partner_id,
+                                         data=mock.ANY,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+
+    def test_deprecated_config_notification_with_empty_dictionary_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.update_notification_config({})
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
+                                         '%s/config' % self.sift_client.partner_id,
+                                         data=mock.ANY,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+
+    def test_config_notification_url_with_empty_url_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, "", 0.60)
+
+    def test_config_notification_url_with_invalid_url_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, 42, 0.60)
+
+    def test_config_notification_url_with_invalid_threshold_fails(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            self.assertRaises(RuntimeError, self.sift_client.update_notification_config, "http://api.partner.com/notify?id=%s", "a string")
+
+    def test_config_notification_url_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.update_notification_config("http://api.partner.com/notify?id=%s", 0.60)
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
+                                         '%s/config' % self.sift_client.partner_id,
+                                         data=mock.ANY,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+
+    def test_config_notification_url_with_null_threshold_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.update_notification_config(
+                "http://api.partner.com/notify?id=%s",
+                None
+            )
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
+                                         '%s/config' % self.sift_client.partner_id,
+                                         data=mock.ANY,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+
+    def test_config_notification_url_with_null_url_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = json.dumps(valid_config_notification_url_response_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.put') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.update_notification_config(
+                None,
+                0.60
+            )
             mock_post.assert_called_with('https://partner.siftscience.com/v3/accounts/'
                                          '%s/config' % self.sift_client.partner_id,
                                          data=mock.ANY,
