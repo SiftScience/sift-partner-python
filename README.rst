@@ -1,6 +1,9 @@
 ============================
-Sift Science Parntership API
+Sift Science Parntership API |TravisCI|_
 ============================
+
+.. |TravisCI| image:: https://travis-ci.org/SiftScience/sift-partner-python.svg?branch=master
+.. _TravisCI: https://travis-ci.org/SiftScience/sift-partner-python
 
 Bindings for Sift Science's `Partnerships API <https://siftscience.com/resources/references/partner-api.html>`_.
 
