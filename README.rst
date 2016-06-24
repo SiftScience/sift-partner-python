@@ -1,5 +1,5 @@
 ============================
-Sift Science Parntership API |TravisCI|_
+Sift Science Partnership API |TravisCI|_
 ============================
 
 .. |TravisCI| image:: https://travis-ci.org/SiftScience/sift-partner-python.svg?branch=master
