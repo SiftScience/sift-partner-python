@@ -105,13 +105,16 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise e
 
-    def get_accounts(self):
-        """Gets a listing of the ids and keys for all merchant accounts that
-           have been created by this partner.
+    def get_accounts(self, next_ref = None):
+        """Gets a listing of the ids and keys for merchant accounts that
+           have been created by this partner. Results limited to 100 accounts
+           per request.
 
         :return: When successful, returns a dict including the key data, which
                  is an array of account descriptions. (Each element has the
-                 same structure as a single response from new_account).
+                 same structure as a single response from new_account). If
+                 has_more is true, pass the value of next_ref back into this
+                 function to get the next set of results.
 
                  When an error occurs, an exception is raised.
         """
@@ -120,7 +123,7 @@ class Client(object):
         }
 
         try:
-            res = requests.get(self.accounts_url(),
+            res = requests.get(self.accounts_url() if not next_ref else next_ref,
                                headers=headers,
                                timeout=API_TIMEOUT
             )

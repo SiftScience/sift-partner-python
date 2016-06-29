@@ -44,7 +44,7 @@ def valid_create_new_account_response_json():
               "account_id":"54125bfee4b0beea0dfebfb9"
            }
 
-def valid_get_accounts_list_response_json():
+def valid_get_accounts_first_list_response_json(partner_account_id):
     return {
             "data": [
               {
@@ -82,6 +82,17 @@ def valid_get_accounts_list_response_json():
                   ]
                 }
               },
+            ],
+            "has_more": True,
+            "total_results": 2,
+            "next_ref": "https://partner.siftscience.com/v3/partners/%s/accounts"
+                        "?after=54125bfee4b0beea0dfebfba" % partner_account_id,
+            "type": "partner_account"
+          }
+
+def valid_get_accounts_second_list_response_json():
+    return {
+            "data": [
               {
                 "account_id": "541793ece4b0550b2274a8ed",
                 "production": {
@@ -381,12 +392,17 @@ class TestSiftPythonClient(unittest.TestCase):
             self.assertTrue('account_id' in response.body.keys())
 
     def test_get_accounts_list_ok(self):
-        mock_response = mock.Mock()
-        mock_response.content = json.dumps(valid_get_accounts_list_response_json())
-        mock_response.json.return_value = json.loads(mock_response.content)
-        mock_response.status_code = 200
+        mock_response_one = mock.Mock()
+        mock_response_one.content = json.dumps(valid_get_accounts_first_list_response_json(self.sift_client.partner_id))
+        mock_response_one.json.return_value = json.loads(mock_response_one.content)
+        mock_response_one.status_code = 200
+        mock_response_two = mock.Mock()
+        mock_response_two.content = json.dumps(valid_get_accounts_second_list_response_json())
+        mock_response_two.json.return_value = json.loads(mock_response_two.content)
+        mock_response_two.status_code = 200
+        next_ref = None
         with mock.patch('requests.get') as mock_post:
-            mock_post.return_value = mock_response
+            mock_post.return_value = mock_response_one
             response = self.sift_client.get_accounts()
             mock_post.assert_called_with('https://partner.siftscience.com/v3/partners/'
                                          '%s/accounts' % self.sift_client.partner_id,
@@ -395,11 +411,29 @@ class TestSiftPythonClient(unittest.TestCase):
             )
             self.assertTrue(response.is_ok())
             self.assertTrue('has_more' in response.body.keys())
-            self.assertFalse(response.body['has_more'])
+            self.assertTrue(response.body['has_more'])
             self.assertTrue('total_results' in response.body.keys())
             self.assertEqual(response.body['total_results'], 2)
             self.assertTrue('data' in response.body.keys())
-            self.assertEqual(len(response.body['data']), 2)
+            self.assertEqual(len(response.body['data']), 1)
+            self.assertTrue('next_ref' in response.body.keys())
+            next_ref = response.body['next_ref']
+        with mock.patch('requests.get') as mock_post:
+            mock_post.return_value = mock_response_two
+            response = self.sift_client.get_accounts(next_ref)
+            mock_post.assert_called_with('https://partner.siftscience.com/v3/partners/'
+                                         '%s/accounts?after=54125bfee4b0beea0dfebfba'
+                                         % self.sift_client.partner_id,
+                                         headers=mock.ANY,
+                                         timeout=mock.ANY,
+            )
+            self.assertTrue(response.is_ok())
+            self.assertTrue('has_more' in response.body.keys())
+            self.assertFalse(response.body['has_more'])
+            self.assertEqual(response.body['total_results'], 2)
+            self.assertTrue('data' in response.body.keys())
+            self.assertEqual(len(response.body['data']), 1)
+            self.assertFalse('next_ref' in response.body.keys())
 
     def test_config_notifications_url_with_invalid_config_fails(self):
         mock_response = mock.Mock()
